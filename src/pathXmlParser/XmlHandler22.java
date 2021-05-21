@@ -7,7 +7,7 @@ import org.xml.sax.helpers.DefaultHandler;
 import java.util.Iterator;
 import java.util.Stack;
 
-public class XmlHandler extends DefaultHandler {
+public class XmlHandler22 extends DefaultHandler {
 
     Stack<String> paths = new Stack<>();
 
@@ -16,20 +16,18 @@ public class XmlHandler extends DefaultHandler {
 
         paths.push(qName);
 
-            StringBuilder path = new StringBuilder();
-            Iterator iterator = paths.iterator();
-            while (iterator.hasNext()) {
-                path.append("/" + iterator.next());
-            }
-            System.out.println(path);
+        StringBuilder path = new StringBuilder();
 
+        Iterator iterator = paths.iterator();
+        while (iterator.hasNext()) {
+            path.append("/" + iterator.next());
+        }
 
+        System.out.println(path);
     }
 
     @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
         paths.pop();
     }
-
-
 }

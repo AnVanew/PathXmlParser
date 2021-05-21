@@ -1,9 +1,10 @@
 package pathXmlParser;
 
 public class Cat {
-    @XmlPath(path = "namelyaya")
-    String name;
+    @Attribute(name = "first")
+    @XmlPath(path = "/cat/name")
+    public String name;
 
-    @XmlPath(path = "sdsd")
-    String sd;
+    @XmlPath(path = "/cat/surname")
+    public String surname;
 }
