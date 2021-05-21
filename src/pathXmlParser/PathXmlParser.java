@@ -20,7 +20,6 @@ import java.util.Stack;
 public class PathXmlParser {
 
     Map<String, Field> pathFieldMap;
-    Map<Field, String> attributeFieldMap;
 
     Object t;
 
@@ -30,7 +29,6 @@ public class PathXmlParser {
         t = (T) new Cat();
 
         pathFieldMap = getXmlPathFieldsMap(T);
-        attributeFieldMap = getAttributeFieldsMap(T);
 
         try {
             SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
@@ -60,20 +58,6 @@ public class PathXmlParser {
         return fieldMap;
     }
 
-    private Map<Field, String> getAttributeFieldsMap(Class<?> T) {
-
-        Map<Field, String> fieldMap = new HashMap<>();
-        Field[] fields = T.getDeclaredFields();
-
-        for (Field field : fields) {
-            if (field.isAnnotationPresent(Attribute.class)) {
-                fieldMap.put(field, field.getAnnotation(Attribute.class).name());
-            }
-        }
-
-        return fieldMap;
-    }
-
     class XmlHandler extends DefaultHandler {
 
         Stack<String> paths = new Stack<>();
@@ -85,12 +69,13 @@ public class PathXmlParser {
             if (attributes.getLength() != 0){
                 setFieldByAttribute(attributes);
             }
+
         }
 
         @Override
         public void characters(char[] ch, int start, int length) throws SAXException {
             String information = new String(ch, start, length).replace("\n", "").trim();
-            setField(information);
+            if (!information.isEmpty()) setField(information, getCurrentPath());
         }
 
         @Override
@@ -108,14 +93,12 @@ public class PathXmlParser {
         }
 
         private void setFieldByAttribute(Attributes attributes){
-            String path = getCurrentPath();
-            Field field = pathFieldMap.get(path);
-            setField(attributes.getValue(attributeFieldMap.get(field)));
+            for (int i = 0; i < attributes.getLength(); i++) {
+                setField(attributes.getValue(i), getCurrentPath() + ":" + attributes.getQName(i));
+            }
         }
 
-        private void setField(String information){
-
-            String path = getCurrentPath();
+        private void setField(String information, String path){
             if (pathFieldMap.containsKey(path)) {
                 try {
                     Field field = pathFieldMap.get(path);
