@@ -1,8 +1,9 @@
 <cat>
-<name firdfst="henrrrr"/>
-<df>
-</df>
+<name first="henrrrr"/>
+	<sex>
+true
+	</sex>
 <surname>
-john
+	john
 </surname>
 </cat>

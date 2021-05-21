@@ -10,6 +10,6 @@ public class Main {
         FileInputStream file = new FileInputStream(new File("cat.xml"));
         PathXmlParser pathXmlParser = new PathXmlParser();
         Cat cat = pathXmlParser.parseFromXml(file, Cat.class);
-        System.out.println(cat.name);
+        System.out.println(cat.sex);
     }
 }

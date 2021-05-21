@@ -7,6 +7,8 @@ import org.xml.sax.helpers.DefaultHandler;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+import java.beans.PropertyEditor;
+import java.beans.PropertyEditorManager;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
@@ -36,11 +38,7 @@ public class PathXmlParser {
 
             saxParser.parse(inputStream, xmlHandler);
 
-        } catch (ParserConfigurationException  e) {
-            e.printStackTrace();
-        } catch (SAXException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (ParserConfigurationException | SAXException | IOException e) {
             e.printStackTrace();
         }
 
@@ -103,9 +101,8 @@ public class PathXmlParser {
         private String getCurrentPath() {
             StringBuilder path = new StringBuilder();
 
-            Iterator iterator = paths.iterator();
-            while (iterator.hasNext()) {
-                path.append("/" + iterator.next());
+            for (String s : paths) {
+                path.append("/").append(s);
             }
             return path.toString();
         }
@@ -117,15 +114,22 @@ public class PathXmlParser {
         }
 
         private void setField(String information){
+
             String path = getCurrentPath();
             if (pathFieldMap.containsKey(path)) {
                 try {
                     Field field = pathFieldMap.get(path);
-                    field.set(t, information);
+                    field.set(t, convert(field.getType(), information));
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
                 }
             }
+        }
+
+        private <T> T convert(Class<?> T, String text) {
+            PropertyEditor editor = PropertyEditorManager.findEditor(T);
+            editor.setAsText(text);
+            return (T) editor.getValue();
         }
     }
 }
