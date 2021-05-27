@@ -1,15 +1,14 @@
 <cat>
-<name first="henrrrr">
-	mkk
-
-
-
-
-</name>
-	<sex>
-false
-	</sex>
-<surname>
-	john
-</surname>
+<name first="John"/>
+	<child>
+		<name>First_child</name>
+		<momName>John</momName>
+	</child>
+	<surname>
+		john
+	</surname>
+	<sons>
+		<name>SonSon</name>
+		<momName>ne_John</momName>
+	</sons>
 </cat>

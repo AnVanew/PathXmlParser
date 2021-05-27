@@ -7,6 +7,6 @@ import java.lang.annotation.Target;
 
 @Target(value= ElementType.FIELD)
 @Retention(value= RetentionPolicy.RUNTIME)
-public @interface Attribute {
-    String name();
+public @interface XmlMultiPath {
+    String[] path();
 }
