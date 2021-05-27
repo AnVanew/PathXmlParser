@@ -11,6 +11,7 @@ public class Main {
         FileInputStream file = new FileInputStream(new File("cat.xml"));
         PathXmlParser pathXmlParser = new PathXmlParser();
         Cat cat = pathXmlParser.parseFromXml(file, Cat.class);
+        System.out.println(cat.surname);
         for (Kitty kitty :  cat.kittySet){
             System.out.println(kitty.name);
             System.out.println(kitty.momName);

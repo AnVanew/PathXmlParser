@@ -2,11 +2,11 @@ package pathXmlParser;
 
 public class Kitty {
 
-    @XmlMultiPath(path = {"/cat/sons/name", "/cat/child/name"})
+    @XmlMultiPath(path = {"/cat/sons/son/name", "/cat/child/name"})
     public String name;
 
-    @XmlMultiPath(path = {"/cat/sons/momName", "/cat/child/momName"})
+    @XmlMultiPath(path = {"/cat/sons/son/momName", "/cat/child/momName"})
     public String momName;
 
-    int Type;
+    public String type;
 }

@@ -99,6 +99,7 @@ public class PathXmlParser {
                 setFieldByAttribute(attributes);
             }
 
+            //Если наткнулись на Set
             if(pathFieldMap.containsKey(getCurrentPath()) && pathFieldMap.get(getCurrentPath()).isAnnotationPresent(XmlSet.class)){
 
                 Class<?> innerClass = pathFieldMap.get(getCurrentPath()).getAnnotation(XmlSet.class).setClass();
@@ -111,6 +112,14 @@ public class PathXmlParser {
                     Object obj = Class.forName(innerClass.getName()).newInstance();
                     fieldSetMap.get(pathFieldMap.get(getCurrentPath())).add(obj);
                     objectStack.push(obj);
+
+                    //TODO constants
+                    try {
+                        innerClass.getField("type").set(obj, getCurrentPath());
+                    } catch (NoSuchFieldException e) {
+                        e.printStackTrace();
+                    }
+
                 } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
                     e.printStackTrace();
                 }

@@ -8,7 +8,14 @@
 		john
 	</surname>
 	<sons>
-		<name>SonSon</name>
-		<momName>ne_John</momName>
+		<son>
+			<name>SonSon</name>
+			<momName>ne_John</momName>
+		</son>
+		<son>
+			<name>SonSon</name>
+			<momName>ne_John</momName>
+		</son>
+
 	</sons>
 </cat>
