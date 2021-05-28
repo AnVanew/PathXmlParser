@@ -1,3 +1,4 @@
+import pathXmlParser.Activities;
 import pathXmlParser.Cat;
 import pathXmlParser.Kitty;
 import pathXmlParser.PathXmlParser;
@@ -11,10 +12,11 @@ public class Main {
         FileInputStream file = new FileInputStream(new File("cat.xml"));
         PathXmlParser pathXmlParser = new PathXmlParser();
         Cat cat = pathXmlParser.parseFromXml(file, Cat.class);
-        System.out.println(cat.surname);
-        for (Kitty kitty :  cat.kittySet){
-            System.out.println(kitty.name);
-            System.out.println(kitty.momName);
+
+        for (Kitty s : cat.kittySet){
+            System.out.println(s.name);
+            System.out.println(s.momName);
+            System.out.println(s.activity);
         }
     }
 }

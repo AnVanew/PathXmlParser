@@ -8,14 +8,9 @@
 		john
 	</surname>
 	<sons>
-		<son>
-			<name>SonSon</name>
-			<momName>ne_John</momName>
+		<son name="sin" momName="mom"/>
+		<son name="sdf" momName="ddffsf">
+				<activity name="football" count="9"/>
 		</son>
-		<son>
-			<name>SonSon</name>
-			<momName>ne_John</momName>
-		</son>
-
 	</sons>
 </cat>

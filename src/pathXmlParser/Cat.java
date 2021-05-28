@@ -14,7 +14,7 @@ public class Cat {
 
     //Если емеем дело со списком, то в конце указать имя элемента
     @XmlSet(setClass = Kitty.class)
-    @XmlMultiPath(path = {"/cat/sons/son", "/cat/child"})
+    @XmlMultiPath(path = {"/cat/sons", "/cat/child"})
     public Set<Kitty> kittySet;
 
 }
