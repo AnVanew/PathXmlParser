@@ -1,10 +1,10 @@
 package pathXmlParser;
 
 public class Activities {
-    @XmlPath(path = "/cat/sons/son/activity:name")
+    @XmlMultiPath(path = {"/cat/sons/son/activity:name", "/cat/child/chill/activity:name"})
     public String name;
 
-    @XmlPath(path = "/cat/sons/son/activity:count")
+    @XmlMultiPath(path = {"/cat/sons/son/activity:count", "/cat/child/chill/activity:count"})
     public Integer count;
 
     public String type;

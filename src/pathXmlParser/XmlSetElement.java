@@ -7,6 +7,6 @@ import java.lang.annotation.Target;
 
 @Target(value= ElementType.FIELD)
 @Retention(value= RetentionPolicy.RUNTIME)
-public @interface XmlInnerClass {
-    String[] path();
+public @interface XmlSetElement {
+    String[] elements();
 }

@@ -1,8 +1,15 @@
 <cat>
 <name first="John"/>
 	<child>
-		<name>First_child</name>
-		<momName>John</momName>
+		<chill name="rrreee" momName="drer">
+			<activity name="baset" count = "10"/>
+		</chill>
+<!--		<chill name="rrreee" momName="dwerrrrrrrrrrrrr">-->
+<!--			<activity name="coco" count = "9898"/>-->
+<!--		</chill>-->
+<!--		<chill name="twerk" momName="treert">-->
+<!--			<activity name="qweqwe" count = "78"/>-->
+<!--		</chill>-->
 	</child>
 	<surname>
 		john
@@ -11,6 +18,9 @@
 		<son name="sin" momName="mom"/>
 		<son name="sdf" momName="ddffsf">
 				<activity name="football" count="9"/>
+		</son>
+		<son name="jhjgj" momName="ytutyu">
+			<activity name="ffghfghfgh" count="9"/>
 		</son>
 	</sons>
 </cat>

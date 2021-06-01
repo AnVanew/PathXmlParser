@@ -16,7 +16,8 @@ public class Main {
         for (Kitty s : cat.kittySet){
             System.out.println(s.name);
             System.out.println(s.momName);
-            System.out.println(s.activity);
+            if (s.activity!= null)System.out.println(s.activity.count);
+            System.out.println("------------------------------");
         }
     }
 }
