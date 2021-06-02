@@ -1,4 +1,3 @@
-import pathXmlParser.Activities;
 import pathXmlParser.Cat;
 import pathXmlParser.Kitty;
 import pathXmlParser.PathXmlParser;
@@ -13,7 +12,7 @@ public class Main {
         PathXmlParser pathXmlParser = new PathXmlParser();
         Cat cat = pathXmlParser.parseFromXml(file, Cat.class);
 
-        for (Kitty s : cat.kittySet){
+        for (Kitty s : cat.getKittySet()){
             System.out.println(s.name);
             System.out.println(s.momName);
             if (s.activity!= null)System.out.println(s.activity.count);

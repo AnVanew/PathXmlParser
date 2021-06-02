@@ -17,69 +17,79 @@ import java.util.*;
 public class PathXmlParser {
 
     Map<String, Field> pathFieldMap = new HashMap<>();
-    Map<Field, Set> fieldSetMap;
+    Map<Field, Set> fieldSetMap = new HashMap<>();
+
+    Map<Object, Field> objectInnerSetMap = new HashMap<>();
+    Map<String, Field> innerSetPathFieldMap = new HashMap<>();
+
     Map<Field, Object> innerObjectMap = new HashMap<>();
     Map<Object, Object> outObjectMap = new HashMap<>();
+    Map<String, Field> setElements = new HashMap<>();
 
     Stack<String> paths = new Stack<>();
-    Stack<Object> currentObjectStack = new Stack<>();
     Stack<String> currentTagStack = new Stack<>();
+    Stack<Object> currentObjectStack = new Stack<>();
+
     Object t;
 
     public <T> T parseFromXml(InputStream inputStream, Class<?> T) {
 
-        //TODO
-        t = (T) new Cat();
-        currentObjectStack.push(t);
+        try {
+            t = Class.forName(T.getName()).newInstance();
+            currentObjectStack.push(t);
+        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
 
         getXmlPathFieldsMap(T);
-        fieldSetMap = new HashMap<>();
 
         try {
             SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
             XmlHandler xmlHandler = new XmlHandler();
-
             saxParser.parse(inputStream, xmlHandler);
-
-            setCompleteObjectFields();
-
         } catch (ParserConfigurationException | SAXException | IOException e) {
             e.printStackTrace();
         }
+
+        setCompleteObjectFields();
+
         return (T) t;
-
-
     }
 
     private void setCompleteObjectFields(){
+
+        for (Map.Entry<Object, Field> entry : objectInnerSetMap.entrySet()){
+            setObjectField(entry.getKey(), entry.getValue(), fieldSetMap.get(entry.getValue()));
+        }
+
         for (Map.Entry<Object, Object> entry : outObjectMap.entrySet()) {
             Field[] field = entry.getKey().getClass().getFields();
-            for (Field field1 : field) {
-                if (field1.isAnnotationPresent(XmlInnerClass.class)) {
-                    try {
-                        field1.set(entry.getKey(), entry.getValue());
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                    }
+            for (Field parentField : field) {
+                if (parentField.isAnnotationPresent(XmlInnerClass.class)) {
+                    setObjectField(entry.getKey(), parentField, entry.getValue());
                 }
             }
         }
 
         for (Field field : fieldSetMap.keySet()){
-            try {
-                field.set(t, fieldSetMap.get(field));
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
+            if (!field.isAnnotationPresent(XmlInnerSet.class)) setObjectField(t, field, fieldSetMap.get(field));
         }
     }
 
+    private void setObjectField(Object o, Field field, Object value){
+        try {
+            field.set(o, value);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+    }
 
     private void getXmlPathFieldsMap(Class<?> T) {
 
         Field[] fields = T.getDeclaredFields();
 
         for (Field field : fields) {
+            field.setAccessible(true);
             if (field.isAnnotationPresent(XmlPath.class)) {
                 pathFieldMap.put(field.getAnnotation(XmlPath.class).path(), field);
             }
@@ -88,12 +98,24 @@ public class PathXmlParser {
                     pathFieldMap.put(path, field);
                 }
             }
+
             if (field.isAnnotationPresent(XmlSet.class)){
                 getXmlPathFieldsMap(field.getAnnotation(XmlSet.class).setClass());
                 for (String endPath : field.getAnnotation(XmlSetElement.class).elements()){
-                    pathFieldMap.put(endPath, field);
+                    setElements.put(endPath, field);
                 }
+
+                Class<?> innerClass = field.getAnnotation(XmlSet.class).setClass();
+                if (!fieldSetMap.containsKey(field)) {
+                    fieldSetMap.put(field, createNewHashSet(innerClass));
+                }
+
             }
+
+            if (field.isAnnotationPresent(XmlInnerSet.class)){
+                innerSetPathFieldMap.put(field.getAnnotation(XmlInnerSet.class).path(), field);
+            }
+
             if (field.isAnnotationPresent(XmlInnerClass.class)){
                 for (String path : field.getAnnotation(XmlInnerClass.class).path()){
                     pathFieldMap.put(path, field);
@@ -103,13 +125,16 @@ public class PathXmlParser {
         }
     }
 
+    private <T> Set<T> createNewHashSet (Class<T> t){
+        return new HashSet<T>();
+    }
+
     class XmlHandler extends DefaultHandler {
 
         @Override
         public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+
             paths.push(qName);
-
-
 
             //Если наткнулись на внутренний класс
             if(pathFieldMap.containsKey(getCurrentPath()) && pathFieldMap.get(getCurrentPath()).isAnnotationPresent(XmlInnerClass.class)){
@@ -118,42 +143,30 @@ public class PathXmlParser {
 
                 Class<?> innerClass = pathFieldMap.get(getCurrentPath()).getType();
 
-                Object obj = null;
                 try {
-                    obj = Class.forName(innerClass.getName()).newInstance();
-                } catch (InstantiationException e) {
-                    e.printStackTrace();
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                } catch (ClassNotFoundException e) {
+                    Object obj = Class.forName(innerClass.getName()).newInstance();
+
+                    outObjectMap.put(currentObjectStack.peek(), obj);
+                    innerObjectMap.put(pathFieldMap.get(getCurrentPath()), obj);
+
+                    currentObjectStack.push(obj);
+                } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
                     e.printStackTrace();
                 }
-
-                outObjectMap.put(currentObjectStack.peek(), obj);
-                innerObjectMap.put(pathFieldMap.get(getCurrentPath()), obj);
-
-                currentObjectStack.push(obj);
             }
 
+            //Если наткнулись на элемент set-a
+            if (setElements.containsKey(getCurrentPath())){
 
+                String[] elements = setElements.get(getCurrentPath()).getAnnotation(XmlSetElement.class).elements();
 
-
-            //Если наткнулись на Set
-            if(pathFieldMap.containsKey(getCurrentPath()) && pathFieldMap.get(getCurrentPath()).isAnnotationPresent(XmlSet.class)) {
-
-                Class<?> innerClass = pathFieldMap.get(getCurrentPath()).getAnnotation(XmlSet.class).setClass();
-
-                if (!fieldSetMap.containsKey(pathFieldMap.get(getCurrentPath()))) {
-                    fieldSetMap.put(pathFieldMap.get(getCurrentPath()), createNewHashSet(innerClass));
-                }
-                else {
-                String[] elements = pathFieldMap.get(getCurrentPath()).getAnnotation(XmlSetElement.class).elements();
-
+                Class<?> innerClass = setElements.get(getCurrentPath()).getAnnotation(XmlSet.class).setClass();
                 for (String element : elements) {
                     if (element.equals(getCurrentPath())) {
                         try {
                             Object obj = Class.forName(innerClass.getName()).newInstance();
-                            fieldSetMap.get(pathFieldMap.get(getCurrentPath())).add(obj);
+                            fieldSetMap.get(setElements.get(getCurrentPath())).add(obj);
+
                             currentObjectStack.push(obj);
                             currentTagStack.push(qName);
 
@@ -169,18 +182,17 @@ public class PathXmlParser {
                         }
                     }
                 }
-                }
             }
 
+            //Если наткнулись на внутренний Set
+            if(innerSetPathFieldMap.containsKey(getCurrentPath())) {
+                objectInnerSetMap.put(currentObjectStack.peek(), innerSetPathFieldMap.get(getCurrentPath()));
+            }
 
-            // Если элемент с атрибутами
+            // Если наткнулись на элемент с атрибутами
             if (attributes.getLength() != 0){
                 setFieldByAttribute(attributes);
             }
-        }
-
-        private <T> Set<T> createNewHashSet (Class<T> t){
-            return new HashSet<T>();
         }
 
         @Override
@@ -193,12 +205,8 @@ public class PathXmlParser {
         public void endElement(String uri, String localName, String qName) throws SAXException {
 
             if (!currentTagStack.isEmpty() && qName.equals(currentTagStack.peek())){
-//                System.out.println(getCurrentPath());
-//                System.out.println(currentObjectStack + " STACK before");
                 currentObjectStack.pop();
                 currentTagStack.pop();
-//                System.out.println(currentObjectStack + " STACK after");
-//                System.out.println("--------------------------------");
             }
 
             paths.pop();
@@ -221,6 +229,7 @@ public class PathXmlParser {
 
         private void setField(String information, String path){
             if (pathFieldMap.containsKey(path)) {
+
                 try {
                     Field field = pathFieldMap.get(path);
                     field.set(currentObjectStack.peek(), convert(field.getType(), information));
